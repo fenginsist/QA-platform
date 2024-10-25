@@ -8,25 +8,28 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @Service
 public class OpenAIService {
 
     private static final Logger logger = LoggerFactory.getLogger(OpenAIService.class);
 
-
     private final WebClient webClient;
 
     private String apiKey;
 
-    private String endpoint;
+    private String endPoint;
 
     // 构造函数注入 WebClient.Builder 和配置值
-    public OpenAIService(WebClient.Builder webClientBuilder, @Value("${openai.api.key}") String apiKey, @Value("${openai.api.endpoint}") String endpoint) {
+    public OpenAIService(WebClient.Builder webClientBuilder
+            , @Value("${openai.api.apiKey}") String apiKey
+            , @Value("${openai.api.endPoint}") String endPoint
+    ) {
         this.apiKey = apiKey;
-        this.endpoint = endpoint;
+        this.endPoint = endPoint;
         this.webClient = webClientBuilder
-                .baseUrl(this.endpoint)
+                .baseUrl(this.endPoint)
                 .defaultHeader("Authorization", this.apiKey)
                 .build();
     }
@@ -44,7 +47,8 @@ public class OpenAIService {
         return webClient.post()
                 //.uri(this.endpoint)     // 这里不用加了，在 构造函数中已经添加了  .baseUrl(this.endpoint)
                 .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(chatMessage)
+                //.bodyValue(chatMessage) // .bodyValue() 是在spring webflux 5.2后引入的，如果springboot低于2.2是不能使用的
+                .body(Mono.just(chatMessage), OpenAIChatMessage.class)
                 .accept(MediaType.TEXT_EVENT_STREAM)
                 .retrieve()
                 .bodyToFlux(String.class)

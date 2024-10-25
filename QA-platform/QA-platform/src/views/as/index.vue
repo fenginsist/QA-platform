@@ -28,11 +28,14 @@ export default {
   mounted() {
   },
   methods: {
+    addMessage(message) {
+      this.messages.push(message)
+    },
     sendMessage() {
-      this.messages.push({ type: 'user', text: this.userInput })
+      this.addMessage({ type: 'user', text: this.userInput })
       // 检查消息是否为空
       if (this.userInput.trim() === '' || this.userInput.length == 0) {
-        this.messages.push({ type: 'ai', text: '问题不可为空' })
+        this.addMessage({ type: 'ai', text: '问题不可为空' })
         this.scrollToBottom()
         return;
       }
@@ -59,9 +62,11 @@ export default {
     // 流式输出
     submitQuestionStream() {
       // 向后端发请求。
-      let message = {
+      let params = {
         'message': this.question
       }
+      let _this = this
+      let flag = true; // 仅执行一次
       fetchEventSource('/api/chat/chat-stream', {
         // 你可以在这里设置请求方法、请求头和请求体
         method: 'POST', // 或者 'POST'，取决于你的后端端点
@@ -77,15 +82,12 @@ export default {
         // 处理接收到的消息
         onmessage(ev) {
           // this.messages.push(event.data);// 动态接收和处理每条消息
-          let content = ev.data.content
-          console.log('onmessage', ev);
-          console.log('onmessage', JSON.stringify(ev));
-          console.log('onmessage', content);
-          generatingMessage.message += content
-          const now = new Date();
-          const dateString = now.toLocaleString();
-          generatingMessage.createTime = dateString;
-          generatingMessage.generating = false;
+          let content = ev.data
+          if (data != '[DONE]') {
+            if (flag) {
+              _this.messages
+            }
+          }
         },
         // 处理错误
         onerror(error) {
@@ -119,13 +121,13 @@ export default {
         console.log('response success!!!!!!!!!!!!!!!!!!!!!!')
         console.log('aaaa:', res)
 
-        this.messages.push({ type: 'ai', text: res.answer })
+        this.addMessage({ type: 'ai', text: res.answer })
         this.isLoading = false;
         // this.answer = res.answer
       }).catch(error => {
         console.error('请求失败，发生错误:', JSON.stringify(error));
         // 你可以根据实际需求对错误进行进一步处理
-        this.messages.push({ type: 'ai', text: 'AI 回答失败，请刷新后稍后重试。' });
+        this.addMessage({ type: 'ai', text: 'AI 回答失败，请刷新后稍后重试。' })
         this.isLoading = false;
       })
     },

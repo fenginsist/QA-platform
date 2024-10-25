@@ -24,22 +24,21 @@ public class LLMController {
 
     private static final Logger logger = LoggerFactory.getLogger(LLMController.class);
 
-    private final OpenAIService aiService;
+    @Autowired
+    private OpenAIService aiService;
 
-    @Value("${openai.api.key}")
+    @Value("${openai.api.apiKey}")
     private String apiKey;
 
-    @Value("${openai.api.endpoint}")
+    @Value("${openai.api.endPoint}")
     private String endpoint;
 
     @Autowired
     private RestTemplate restTemplate;
 
-
-    @Autowired
-    public LLMController(OpenAIService aiService) {
-        this.aiService = aiService;
-    }
+//    public LLMController(OpenAIService aiService) {
+//        this.aiService = aiService;
+//    }
 
     /**
      * LLM模型的流式输出
