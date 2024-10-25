@@ -4,8 +4,8 @@ server:
 
 openai:
   api:
-    apiKey: Bearer d002b32f190d7b1ae0bc58b148133774.SD8HCsqGHraP8lWr
-    endPoint: http://192.168.3.55/v1/chat/completions
+    apiKey: Bearer 
+    endPoint: http:///v1/chat/completions
 
 
 logging:
