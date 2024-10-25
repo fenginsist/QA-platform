@@ -1,4 +1,5 @@
 <script setup>
+import { fetchEventSource } from '@microsoft/fetch-event-source';
 import { getllmHr } from '@/api/index.js'     // @microsoft這是包，這裡需要加 @/
 import person_head from '@/assets/icon/person_head.png'
 import cvicse_logo from '@/assets/icon/cvicse-logo.png'

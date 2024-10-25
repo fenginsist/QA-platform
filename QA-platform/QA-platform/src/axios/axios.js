@@ -6,7 +6,7 @@ console.log('baseURL: ', process.env.NODE_ENV === 'production'? 'http://192.168.
 // 创建 Axios 实例//
 const service = axios.create({
     // baseURL: process.env.NODE_ENV === 'production'? 'http://192.168.16.21:8009' : '/',  // 设置后端API的基础URL 
-    baseURL: config.BASE_API,  // 设置后端API的基础URL 
+    baseURL: '/',  // config.BASE_API，设置后端API的基础URL 
     timeout: 5000000, // 设置请求超时时间
     headers: {
         'Content-Type': 'application/json', // 设置请求头

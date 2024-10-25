@@ -1,6 +1,6 @@
 <script setup>
 import Editor from '@tinymce/tinymce-vue'
-import { fetchEventSource } from '@microsoft/fetch-event-source';
+
 </script>
 <script>
 export default {

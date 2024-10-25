@@ -15,7 +15,6 @@ if (process.env.NODE_ENV === 'development') {
     envConfig = {...baseEnv,...devConfig}  // 等价于 webpack 的 merge函数进行合并
 } else {    // (process.env.NODE_ENV === 'production') 
     envConfig = {...baseEnv,...prodConfig} // require('./dev.env.js');
-
 }
 
 export default envConfig;

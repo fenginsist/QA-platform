@@ -1,4 +1,5 @@
 <script setup>
+import { fetchEventSource } from '@microsoft/fetch-event-source';
 import { getllmAs } from '@/api/index.js'     // @microsoft這是包，這裡需要加 @/
 import person_head from '@/assets/icon/person_head.png'
 import cvicse_logo from '@/assets/icon/cvicse-logo.png'
@@ -36,9 +37,9 @@ export default {
         this.scrollToBottom()
         return;
       }
-      this.submitQuestionNoStream()
+      // this.submitQuestionNoStream()
+      this.submitQuestionStream()
       this.scrollToBottom()
-      // this.submitQuestionStream()
       this.userInput = '';
     },
     // 监控键盘按键：Shift + Enter 组合键 换行，enter键发送消息。
@@ -60,7 +61,7 @@ export default {
     submitQuestionStream() {
       // 向后端发请求。
       let message = {
-        'message': this.question
+        'message': this.userInput
       }
       fetchEventSource('/api/chat/chat-stream', {
         // 你可以在这里设置请求方法、请求头和请求体

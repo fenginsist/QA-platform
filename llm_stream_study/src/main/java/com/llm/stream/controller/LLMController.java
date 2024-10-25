@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
+//@CrossOrigin(origins = "*")   // 第二种解决跨域方法
 @RestController
 @RequestMapping("/api/chat")
 public class LLMController {
@@ -26,10 +27,10 @@ public class LLMController {
 
     private final OpenAIService aiService;
 
-    @Value("${openai.api.key}")
+    @Value("${openai.api.apiKey}")
     private String apiKey;
 
-    @Value("${openai.api.endpoint}")
+    @Value("${openai.api.endPoint}")
     private String endpoint;
 
     @Autowired
@@ -58,14 +59,11 @@ public class LLMController {
         List<Message> messageList = new ArrayList<>();
         messageList.add(new Message("user", message));
         chatMessage.setMessages(messageList);
-        chatMessage.setStream(Boolean.FALSE);
+        chatMessage.setStream(Boolean.TRUE);
         chatMessage.setTemperature(0.8);
         chatMessage.setFrequencyPenalty(0.8);
         chatMessage.setPresencePenalty(0.8);
         chatMessage.setMaxTokens(2048);
-
-        logger.info("Request URL: {}", this.endpoint);
-        logger.info("Authorization header: Bearer {}", this.apiKey);
 
         // 调用服务获取流式响应
         return aiService.chatBotStream(chatMessage);

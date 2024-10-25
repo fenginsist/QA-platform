@@ -1,11 +1,11 @@
 server:
-  port: 8080
+  port: 8081
 
 
 openai:
   api:
-    key: Bearer d002b32f190d7b1ae0bc58b148133774.SD8HCsqGHraP8lWr  # 从环境变量获取
-    endpoint: http://192.168.3.55/v1/chat/completions  # OpenAI Chat API 端点
+    apiKey: Bearer d002b32f190d7b1ae0bc58b148133774.SD8HCsqGHraP8lWr
+    endPoint: http://192.168.3.55/v1/chat/completions
 
 logging:
   level:

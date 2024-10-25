@@ -24,19 +24,25 @@ export default defineConfig({
   server: {
     host: true,
     port: 5173,
-    // proxy: {
-    //   '/questionAs': {
-    //     target: 'http://192.168.16.21:8002', 
-    //     changeOrigin: true,
-    //     // rewrite: (path) => path.replace(/^\/api/, ''),
-    //     rewrite: (path) => path.replace(/^\/api/, '/api'), // 修正重写规则
-    //   },
-    //   '/questionHr': {
-    //     target: 'http://192.168.16.21:8001', 
-    //     changeOrigin: true,
-    //     // rewrite: (path) => path.replace(/^\/api/, ''),
-    //     rewrite: (path) => path.replace(/^\/api/, '/api'), // 修正重写规则
-    //   },
-    // },
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8081',
+        changeOrigin: true,
+        // rewrite: (path) => path.replace(/^\/api/, ''),
+        rewrite: (path) => path.replace(/^\/api/, '/api'), // 修正重写规则
+      },
+      //   '/questionAs': {
+      //     target: 'http://192.168.16.21:8002', 
+      //     changeOrigin: true,
+      //     // rewrite: (path) => path.replace(/^\/api/, ''),
+      //     rewrite: (path) => path.replace(/^\/api/, '/api'), // 修正重写规则
+      //   },
+      //   '/questionHr': {
+      //     target: 'http://192.168.16.21:8001', 
+      //     changeOrigin: true,
+      //     // rewrite: (path) => path.replace(/^\/api/, ''),
+      //     rewrite: (path) => path.replace(/^\/api/, '/api'), // 修正重写规则
+      //   },
+    },
   },
 })
