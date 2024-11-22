@@ -2,12 +2,12 @@ import axios from 'axios';
 import config from '../config/index'
 console.log('process.env.NODE_ENV: ', process.env.NODE_ENV)
 console.log('config.API_URL: ', config.BASE_API)
-console.log('baseURL: ', process.env.NODE_ENV === 'production'? 'http://192.168.16.21:8009' : '/')
+console.log('baseURL: ', process.env.NODE_ENV === 'production'? config.BASE_API : config.BASE_API)
 // 创建 Axios 实例//
 const service = axios.create({
     // baseURL: process.env.NODE_ENV === 'production'? 'http://192.168.16.21:8009' : '/',  // 设置后端API的基础URL 
     baseURL: config.BASE_API,  // config.BASE_API，设置后端API的基础URL 
-    timeout: 5000000, // 设置请求超时时间
+    timeout: 40000, // 设置请求超时时间
     headers: {
         'Content-Type': 'application/json', // 设置请求头
     },

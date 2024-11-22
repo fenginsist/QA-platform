@@ -43,6 +43,7 @@ public class LLMController {
 
     /**
      * LLM模型的流式输出
+     *
      * @param chatMsgReq
      * @return
      */
@@ -68,15 +69,29 @@ public class LLMController {
         return aiService.chatBotStream(chatMessage);
     }
 
+    /**
+     * LLM模型的流式输出
+     *
+     * @param chatMsgReq
+     * @return
+     */
+    @PostMapping(value = "/chatRagStream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<String> chatRagStream(@RequestBody ChatMsgReq chatMsgReq) { //, Authentication authentication
+        ResponseEntity<ChatCompletion> response_LLM = restTemplate.exchange(endpoint, HttpMethod.POST, null, ChatCompletion.class);
+        // 调用服务获取流式响应
+        return null;
+    }
+
 
     /**
      * LLM模型的 非流式输出（一次性输出）
+     *
      * @param message
      * @return
      */
     @GetMapping(value = "/chatContent") // , produces = MediaType.TEXT_EVENT_STREAM_VALUE
     public String streamLLMOutput2(String message) { //@RequestBody OpenAIChatMessage chatMessage, , Authentication authentication
-        System.out.println("进来啦，问题是："+ message);
+        System.out.println("进来啦，问题是：" + message);
         // 可以在这里添加认证或权限检查逻辑
         // 例如：获取当前用户信息，根据需要进行权限验证等
 

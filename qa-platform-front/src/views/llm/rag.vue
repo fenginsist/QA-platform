@@ -1,6 +1,6 @@
 <script setup>
 import { fetchEventSource } from '@microsoft/fetch-event-source';
-import { getllmHr } from '@/api/index.js'     // @microsoft這是包，這裡需要加 @/
+import { getllmAs } from '@/api/index.js'     // @microsoft這是包，這裡需要加 @/
 import person_head from '@/assets/icon/person_head.png'
 import cvicse_logo from '@/assets/icon/cvicse-logo.png'
 </script>
@@ -11,7 +11,7 @@ const mdi = new MarkdownIt({
   linkify: true,
 });
 export default {
-  name: 'HR',
+  name: 'RAG',
   data() {
     return {
       messages: [],  // 存储接收到的LLM输出
@@ -25,7 +25,7 @@ export default {
         generating: false, // 标记是否正在生成
       },
       currentSessionId: null, // 当前会话 ID（如果需要）
-      unReponse: true,        // 控制状态的标志
+      unReponse: true,        // 控制状态的标志,仅执行状态。
       scrollbar: 50,
       always: true
     }
@@ -33,32 +33,20 @@ export default {
   mounted() {
   },
   methods: {
-    getCurrentDateTime() {
-      const now = new Date();
-      const year = now.getFullYear();
-      const month = (now.getMonth() + 1).toString().padStart(2, '0'); // 月份是从0开始的，所以需要+1
-      const day = now.getDate().toString().padStart(2, '0');
-      const hours = now.getHours().toString().padStart(2, '0');
-      const minutes = now.getMinutes().toString().padStart(2, '0');
-      const seconds = now.getSeconds().toString().padStart(2, '0');
-      return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-    },
     addMessage(message) {
       this.messages.push(message)
     },
     sendMessage() {
-      // console.log(this.getCurrentDateTime())
-      this.addMessage({ type: 'user', text: this.userInput, time: this.getCurrentDateTime() })
+      this.addMessage({ type: 'user', text: this.userInput })
       // 检查消息是否为空
       if (this.userInput.trim() === '' || this.userInput.length == 0) {
-        this.addMessage({ type: 'ai', text: '问题不可为空', time: this.getCurrentDateTime() })
+        this.addMessage({ type: 'ai', text: '问题不可为空' })
         this.scrollToBottom()
         return;
       }
       // this.submitQuestionNoStream()
       this.submitQuestionRAGStream()
       this.scrollToBottom()
-      // this.submitQuestionStream()
       this.userInput = '';
     },
     // 监控键盘按键：Shift + Enter 组合键 换行，enter键发送消息。
@@ -95,9 +83,7 @@ export default {
           'Authorization': 'sss',
           'Cache-Control': 'no-cache'
         },
-        openWhenHidden: true,  // 禁止在页面隐藏时自动重连
-        retryInterval: 0,       // 禁用自动重连
-        retry: false,
+        openWhenHidden: true,
         // 如果需要发送请求体，可以在这里设置
         // body: JSON.stringify(params),
 
@@ -105,18 +91,14 @@ export default {
         onmessage(ev) {
           // console.log('ssssssssss: ', ev)
           let content = ev.data
-          // console.log('content: ', content)
-          if (flag) {  // 仅添加一次，后面：只在数组的最后一个元素进行增量赋值即可
-            if (content.trim() === '[END]') { // 防止出现异常
-              _this.addMessage({ type: 'ai', text: '服务器出现异常请联系管理员：冯凡利！！！', time: _this.getCurrentDateTime() })
-              return
-            }
-            _this.addMessage({ type: 'ai', text: '', time: _this.getCurrentDateTime() })
-            _this.isLoading = false; // 关闭加载
-            flag = false;
-          }
-          if (content.trim() === '[END]') {
+          console.log('content: ', content)
+          if (content === '[END]') {
             return
+          }
+          if (flag) {  // 仅添加一次，后面：只在数组的最后一个元素进行增量赋值即可
+            _this.addMessage({ type: 'ai', text: '' })
+            _this.isLoading = false; // 开始加载
+            flag = false;
           }
           _this.generatingMessage.message += content
           _this.messages[_this.messages.length - 1].text = mdi.render(_this.generatingMessage.message) // _this.generatingMessage.message // mdi.render(_this.generatingMessage.message)
@@ -138,27 +120,20 @@ export default {
         },
         // 处理错误
         onerror(error) {
+          _this.isLoading = false; // 开始加载
+          _this.addMessage({ type: 'ai', text: 'AI 回答失败，请刷新后稍后重试。' })
           console.error('Error:', error);
-          _this.isLoading = false; // 关闭加载
-          _this.addMessage({ type: 'ai', text: '服务器出现异常请联系管理员：冯凡利！！！', time: _this.getCurrentDateTime() })
-          // console.log('all message: ', _this.messages)
-          return
         },
         // 连接打开时的回调
         onopen(response) {
-          _this.isLoading = false; // 关闭加载
-          endTime = performance.now();// 获取结束时间
-          console.log(`fetchEventSource Execution time: ${(endTime - startTime) / 1000} seconds`); // 计算并输出执行时间（转换为秒）
-          if (!response.ok) {
-            _this.addMessage({ type: 'ai', text: '服务器出现异常请联系管理员：冯凡利！！！', time: _this.getCurrentDateTime() })
-            // throw new Error(`HTTP error! status: ${response.status}`);
-          }
           console.log('Connection opened!first launch this:');
-          // console.log(response);
+          console.log(response);
         },
         // 连接关闭时的回调
         onclose() {
-          _this.isLoading = false; // 关闭加载
+          endTime = performance.now();// 获取结束时间
+          console.log(`fetchEventSource Execution time: ${(endTime - startTime) / 1000} seconds`); // 计算并输出执行时间（转换为秒）
+          _this.isLoading = false; // 开始加载
           _this.generatingMessage.message = '';
           _this.generatingMessage.completed = false;
           _this.generatingMessage.createTime = '';
@@ -166,7 +141,7 @@ export default {
           console.log('Connection closed!');
         },
       });
-
+      
     },
     // 非流式输出
     submitQuestionNoStream() {
@@ -175,21 +150,19 @@ export default {
       }
       console.log('params: ', params)
       this.isLoading = true; // 开始加载
-      getllmHr(this.userInput).then(res => {
-        console.log('response success!!!!!!!!!!!!!!!!!!!!!!')
-        console.log('aaaa:', res)
-
-        this.addMessage({ type: 'ai', text: res.answer, time: this.getCurrentDateTime() })
+      getllmAs(this.userInput).then(res => {
+        this.addMessage({ type: 'ai', text: res.answer }) // 这是rag的接口
         this.isLoading = false;
-        // this.answer = res.answer
       }).catch(error => {
         console.error('请求失败，发生错误:', JSON.stringify(error));
-        // 你可以根据实际需求对错误进行进一步处理
-        this.messages.push({ type: 'ai', text: 'AI 回答失败，请刷新后稍后重试。' })
+        this.addMessage({ type: 'ai', text: 'AI 回答失败，请刷新后稍后重试。' })
         this.isLoading = false;
       })
     },
-    // 滚动条显示最新的消息
+    /**
+     * 滚动条显示最新的消息
+     * 下面两个都可以。第二个更好一些。
+     */
     scrollToBottom() {
       let el = document.querySelector("#app > div > div > main > div.el-scrollbar.chat-history > div.el-scrollbar__wrap.el-scrollbar__wrap--hidden-default")
       let el1 = el.querySelector(".el-scrollbar__view")
@@ -198,26 +171,20 @@ export default {
         left: 0,
         behavior: "smooth",
       })
-      // this.$nextTick(() => {
-      //   const scrollbarRef = this.$refs.scrollbarRef;
-      //   console.log('scrollbarRef: ', scrollbarRef)
-      //   console.log('scrollbarRef: ', JSON.stringify(scrollbarRef))
-      //   // scrollbarRef.scrollTo({ top: scrollbarRef.scrollHeight, behavior: 'smooth' });  // 滚动到最底部
-      //   if (scrollbarRef) {
-      //     const wrapRef = scrollbarRef.wrapRef;
-      //     console.log('wrapRef: ', wrapRef)
-      //     console.log('wrapRef: ', JSON.stringify(wrapRef))
-      //     // wrapElement.scrollTop = wrapElement.max-height;
-      //   }
-      // });
+    },
+    scrollToBottom1() {
+      const scrollbarRef = this.$refs.scrollbarRef;
+      if (scrollbarRef) {
+        scrollbarRef.scrollTop = scrollbarRef.scrollHeight;
+      }
     },
     // 开启新会话
     newSession() {
 
     },
-    loadSessions() {
+    loadSessions(){
 
-    }
+    },
   }
 }
 </script>
@@ -226,7 +193,7 @@ export default {
   <div class="app-container">
     <!-- 顶部导航栏 -->
     <el-header class="app-header">
-      <div class="app-logo">中创集团人力资源问答小助手</div>
+      <div class="app-logo">LLM 的非流式输出和流式输出</div>
       <div class="app-user">
         <el-avatar :src="person_head"></el-avatar>
       </div>
@@ -234,6 +201,7 @@ export default {
 
     <!-- 左侧菜单和右侧内容 -->
     <div class="app-body">
+      <!-- <div class="body-main"> -->
       <!-- 左侧菜单栏 -->
       <el-aside width="240px" class="app-sidebar">
         <el-button type="primary" icon="el-icon-plus" @click="newSession" class="new-session-button">新建会话</el-button>
@@ -241,55 +209,33 @@ export default {
 
       <!-- 右侧内容区 -->
       <el-main class="app-content">
+        <!-- 提示区域 -->
+        <div style="padding: 0px 80px 0 68px; margin-bottom: 10px;">
+          <div class="help-container">
+            <div class="help-title">您好，请在对话过程中留意以下事项：</div>
+            <div class="help-content">在不同主题内容下新建独立对话，以减少单轮对话中的交流次数 </div>
+            <div class="help-content">请注意，所有的对话内容都将被记录且无法被删除，请合理规范地使用</div>
+            <div class="help-content">提示: ENTER 回车键发送, ENTER + SHIFT 组合键 换行</div>
+          </div>
+        </div>
         <!-- 问答历史展示区 -->
         <el-scrollbar class="chat-history" ref="scrollbarRef" :always="always" :min-size="scrollbar">
-          <!-- 提示区域 -->
-          <div style="padding: 0px 80px 0 68px; margin-bottom: 10px;">
-            <div class="help-container">
-              <div class="help-title">您好，请在对话过程中留意以下事项：</div>
-              <div class="help-content">温馨提示：</div>
-              <div class="help-content">目前知识库涉及: <span style="font-weight: bolder;">离职、用印、考勤及休假</span> 的知识。请尽量询问与之相关的内容, 后续开放其他知识内容</div>
-              <div class="help-content">目前还在该问题系统还在开发/优化中, 响应时间较长, <span style="color: red;">请耐心等待, 请AI回答后再问下一个问题。</span></div>
-              <div class="help-content">历史记录、新建会话等功能后续优化持续推出, 请各位同事多多期待！！！</div>
-              <!-- <div class="help-content">在不同主题内容下新建独立对话, 以减少单轮对话中的交流次数, 目前新建对话功能暂未实现, 敬请期待 </div> -->
-              <!-- <div class="help-content">所有的对话内容都将被记录且无法被删除，请合理规范地使用</div> -->
-              <div class="help-content">提示: ENTER 回车键发送, ENTER + SHIFT 组合键 换行</div>
-            </div>
-          </div>
           <!-- 循环遍历 -->
           <div v-for="(message, index) in messages" :key="index" :class="['chat-message', message.type]">
             <template v-if="message.type === 'user'">
-              <div>
-                <div class="user-message">
-                  <span>{{ message.text }}</span>
-                  <el-avatar :src="person_head" class="user-icon"></el-avatar>
-                </div>
-                <!-- 显示时间 -->
-                <div style="">
-                  <div style="text-align: right; font-size: 10px; padding-right: 50px;">
-                    <el-icon>
-                      <Timer />
-                    </el-icon>
-                    {{ message.time }}
-                  </div>
+              <div class="user-message">
+                <span>{{ message.text }}</span>
+                <el-avatar :src="person_head" class="user-icon"></el-avatar>
+                <!-- 另开一行 -->
+                <div>
+                  <el-icon><Timer /></el-icon>
                 </div>
               </div>
             </template>
             <template v-else>
-              <div>
-                <div class="ai-message">
-                  <el-avatar :src="cvicse_logo" icon="el-icon-robot" class="ai-icon"></el-avatar>
-                  <text v-html="message.text"></text>
-                </div>
-                <!-- 显示时间 -->
-                <div style="">
-                  <div style="text-align: left; font-size: 10px; padding-left: 50px;">
-                    <el-icon>
-                      <Timer />
-                    </el-icon>
-                    {{ message.time }}
-                  </div>
-                </div>
+              <div class="ai-message">
+                <el-avatar :src="cvicse_logo" icon="el-icon-robot" class="ai-icon"></el-avatar>
+                <text v-html="message.text"></text>
               </div>
             </template>
           </div>
@@ -301,7 +247,7 @@ export default {
 
         <!-- 问题输入区 -->
         <div class="chat-input">
-          <el-input v-model="userInput" class="input-box" :autosize="{ minRows: 4, maxRows: 8 }" type="textarea"
+          <el-input v-model="userInput" class="input-box" :autosize="{ minRows: 2, maxRows: 4 }" type="textarea"
             placeholder="请输入您的问题..." @keydown="handleKeyDown" />
           <!-- @keydown.enter="sendMessage"：监听单独按下 Enter 键，进行发送 
                  @keydown="handleKeyDown": 监控所有事件
@@ -311,6 +257,7 @@ export default {
           </el-button>
         </div>
       </el-main>
+      <!-- </div> -->
     </div>
   </div>
 
@@ -351,6 +298,8 @@ export default {
   overflow: hidden;
 }
 
+.body-main {}
+
 .app-sidebar {
   background-color: #f5f5f5;
   padding: 10px;
@@ -383,7 +332,8 @@ export default {
 .chat-message {
   /* display: flex; */
   margin-bottom: 5px;
-  /* margin-right: 10px; */
+  /* padding-right: 300px;
+  padding-left: 300px; */
 }
 
 .user-message {
@@ -391,7 +341,7 @@ export default {
   justify-content: flex-end;
   align-items: center;
   /* 垂直居中对齐 */
-  /* margin-bottom: 15px; */
+  margin-bottom: 15px;
 }
 
 .ai-message {
@@ -399,7 +349,7 @@ export default {
   justify-content: flex-start;
   align-items: center;
   /* 垂直居中对齐 */
-  /* margin-bottom: 15px; */
+  margin-bottom: 15px;
 }
 
 .user-icon {
@@ -448,24 +398,21 @@ export default {
 
 /* 帮助词 */
 .help-container {
-  width: 100%;
-  height: auto;
+  width: 100%; 
+  height: auto; 
   background-color: #e2eeff;
   padding: 10px;
   border-radius: 10px;
 }
-
 .help-title {
-  color: #4257e9;
-  font-size: 24px;
-  font-weight: 700;
+  color:#4257e9; 
+  font-size: 24px; 
+  font-weight: 700; 
   padding: 10px 0 10px 20px;
 }
-
 .help-content {
-  color: #606266;
-  font-size: 14px;
-  padding: 5px 0 5px 20px;
-  ;
+  color: #606266; 
+  font-size: 14px; 
+  padding: 5px 0 5px 20px;;
 }
 </style>

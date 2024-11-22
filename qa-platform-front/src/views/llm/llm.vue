@@ -64,7 +64,7 @@ export default {
         }
       }
     },
-    // 流式输出
+    // LLM流式输出
     submitQuestionStream() {
       this.isLoading = true; // 开始加载
       // 向后端发请求。
@@ -95,12 +95,12 @@ export default {
           }
           const jsondata = JSON.parse(data);
           let content = jsondata.choices[0].delta.content || ''
-          console.log('content: ', content)
+          // console.log('content: ', content)
           _this.generatingMessage.message += content
           _this.messages[_this.messages.length - 1].text = mdi.render(_this.generatingMessage.message) // _this.generatingMessage.message // mdi.render(_this.generatingMessage.message)
 
           _this.$nextTick(() => {
-            _this.scrollToBottom1();
+            _this.scrollToBottom();
           });
 
           if (_this.unReponse) {

@@ -22,21 +22,33 @@ export default defineConfig({
     host: true,
     port: 5173,
     proxy: {
-      '/api': { // Java后台
-        target: 'http://localhost:8081',
+      // '/api': { // Java后台
+      //   target: 'http://localhost:8081',
+      //   changeOrigin: true,
+      //   // rewrite: (path) => path.replace(/^\/api/, ''),
+      //   rewrite: (path) => path.replace(/^\/api/, '/api'), // 修正重写规则
+      // },
+      '/api': { // LLM流式输出 Java后台 
+        target: 'http://192.168.109.21:8009',
         changeOrigin: true,
         // rewrite: (path) => path.replace(/^\/api/, ''),
         rewrite: (path) => path.replace(/^\/api/, '/api'), // 修正重写规则
       },
       // 以下两个不能合并，因为在服务器上对应着两个rag服务，python
       '/questionAs': {
-        target: 'http://192.168.16.21:8009',
+        target: 'http://192.168.109.21:8009',
         changeOrigin: true,
         // rewrite: (path) => path.replace(/^\/api/, ''),
         rewrite: (path) => path.replace(/^\/api/, '/api'), // 修正重写规则
       },
-      '/questionHr': {
-        target: 'http://192.168.16.21:8009',
+      // '/questionHr': {
+      //   target: 'http://192.168.109.21:8009',
+      //   changeOrigin: true,
+      //   // rewrite: (path) => path.replace(/^\/api/, ''),
+      //   rewrite: (path) => path.replace(/^\/api/, '/api'), // 修正重写规则
+      // },
+      '/chat': { // rag流式输出接口
+        target: 'http://192.168.109.21:8009',
         changeOrigin: true,
         // rewrite: (path) => path.replace(/^\/api/, ''),
         rewrite: (path) => path.replace(/^\/api/, '/api'), // 修正重写规则

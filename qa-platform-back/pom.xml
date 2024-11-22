@@ -13,7 +13,7 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>2.0.6.RELEASE</version>
-<!--        2.0.1.RELEASE/3.1.1/-->
+        <!--        2.0.1.RELEASE/3.1.1/-->
     </parent>
 
 
@@ -28,12 +28,6 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-webflux</artifactId>
         </dependency>
-
-<!--        <dependency>-->
-<!--            <groupId>org.springframework.boot</groupId>-->
-<!--            <artifactId>spring-boot-starter-security</artifactId>-->
-<!--        </dependency>-->
-
 
         <!--2、引入springboot依赖，spring-boot-starter-web表示在项目中增加支持javaweb的功能，版本信息已经在parent中定义-->
         <dependency>
@@ -57,7 +51,7 @@
     <!--3、定义springboot的打包方式，spring-boot-maven-plugin可以在打包时自动将所有类和资源打包成一个独立可运行的jar包-->
     <build>
         <!--打包指定名称-->
-        <finalName>projectName</finalName>
+        <finalName>llm</finalName>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
